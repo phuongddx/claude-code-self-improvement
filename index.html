@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Self-Improvement - Workflow Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+        
+        /* Workflow Steps */
+        .workflow {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .step {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .step:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .step-icon {
+            font-size: 2rem;
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .step-description {
+            color: #aaa;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        .code-block .command {
+            color: #dcdcaa;
+        }
+        
+        .code-block .output {
+            color: #9cdcfe;
+        }
+        
+        /* Use Case Section */
+        .use-case {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .use-case h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #00d2ff;
+        }
+        
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .use-case-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid;
+        }
+        
+        .use-case-card.pitfall {
+            border-color: #ff6b6b;
+        }
+        
+        .use-case-card.workflow {
+            border-color: #4ecdc4;
+        }
+        
+        .use-case-card.decision {
+            border-color: #45b7d1;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .card-icon {
+            font-size: 1.5rem;
+        }
+        
+        .card-title {
+            font-weight: 600;
+        }
+        
+        .card-content {
+            color: #aaa;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .card-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        
+        /* Hooks Visualization */
+        .hooks-section {
+            margin-bottom: 60px;
+        }
+        
+        .hooks-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #00d2ff;
+        }
+        
+        .hooks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .hook-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .hook-card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .hook-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .hook-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        
+        .hook-trigger {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        
+        .hook-action {
+            background: rgba(0, 210, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #00d2ff;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+            margin-bottom: 60px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #00d2ff, #3a7bd5);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            width: 45%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            margin-left: 5%;
+        }
+        
+        .timeline-item:nth-child(even) {
+            margin-left: 50%;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #00d2ff;
+            border-radius: 50%;
+            top: 25px;
+        }
+        
+        .timeline-item:nth-child(odd)::before {
+            right: -8%;
+        }
+        
+        .timeline-item:nth-child(even)::before {
+            left: -8%;
+        }
+        
+        .timeline-time {
+            color: #00d2ff;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer a {
+            color: #00d2ff;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="animate">🧠 Claude Code Self-Improvement</h1>
+        <p class="subtitle animate delay-1">Auto-learn from tasks • Save knowledge • Avoid repeating mistakes</p>
+        
+        <!-- Use Case -->
+        <div class="use-case animate delay-2">
+            <h2>📱 Real Use Case: iOS Stress Monitor App</h2>
+            <p style="color: #aaa; margin-bottom: 20px;">
+                Developer is building a stress monitoring app with HealthKit integration. 
+                Here's how the self-improvement system helps:
+            </p>
+            
+            <div class="use-case-grid">
+                <div class="use-case-card pitfall">
+                    <div class="card-header">
+                        <span class="card-icon">⚠️</span>
+                        <span class="card-title">Pitfall Discovered</span>
+                    </div>
+                    <div class="card-content">
+                        HealthKit data is NOT available on iOS Simulator. 
+                        Must use physical device for HRV, heart rate, and stress data.
+                    </div>
+                    <span class="card-tag">Saved to pitfalls.md</span>
+                </div>
+                
+                <div class="use-case-card workflow">
+                    <div class="card-header">
+                        <span class="card-icon">🔄</span>
+                        <span class="card-title">Workflow Documented</span>
+                    </div>
+                    <div class="card-content">
+                        CoreML model integration: Convert → Drag to Xcode → Add to target → 
+                        Create service → Test on device
+                    </div>
+                    <span class="card-tag">Saved to workflows.md</span>
+                </div>
+                
+                <div class="use-case-card decision">
+                    <div class="card-header">
+                        <span class="card-icon">🏗️</span>
+                        <span class="card-title">Architecture Decision</span>
+                    </div>
+                    <div class="card-content">
+                        Chose MVVM over MVC for better testability. Services layer 
+                        separates HealthKit/CloudKit logic cleanly.
+                    </div>
+                    <span class="card-tag">Saved to decisions.md</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Workflow Steps -->
+        <h2 style="text-align: center; color: #00d2ff; margin-bottom: 30px;" class="animate">How It Works</h2>
+        
+        <div class="workflow">
+            <div class="step animate delay-1">
+                <div class="step-number">1</div>
+                <div class="step-header">
+                    <span class="step-icon">🚀</span>
+                    <span class="step-title">Developer Starts Working</span>
+                </div>
+                <p class="step-description">
+                    Claude Code starts a session. The SessionStart hook fires, reminding 
+                    to check existing knowledge base.
+                </p>
+                <div class="code-block">
+                    <span class="command">$ claude</span><br>
+                    <span class="output">📚 Knowledge loaded: Check .claude/knowledge/ for past learnings before starting.</span><br><br>
+                    <span class="comment"># Claude automatically reads:</span><br>
+                    <span class="command">.claude/knowledge/pitfalls.md</span><br>
+                    <span class="command">.claude/knowledge/workflows.md</span><br>
+                    <span class="command">.claude/knowledge/decisions.md</span>
+                </div>
+            </div>
+            
+            <div class="step animate delay-2">
+                <div class="step-number">2</div>
+                <div class="step-header">
+                    <span class="step-icon">💻</span>
+                    <span class="step-title">Developer Works on Task</span>
+                </div>
+                <p class="step-description">
+                    Developer asks Claude to implement HealthKit integration. 
+                    Claude encounters errors and debugs them.
+                </p>
+                <div class="code-block">
+                    <span class="command">> Add HealthKit integration for heart rate monitoring</span><br><br>
+                    <span class="comment"># Claude reads existing knowledge first:</span><br>
+                    <span class="output">Found pitfall: "HealthKit requires physical device"</span><br><br>
+                    <span class="comment"># Implements with that knowledge:</span><br>
+                    <span class="command">func requestHealthKitPermissions() async throws {</span><br>
+                    <span class="command">    // Uses HKHealthStore.isHealthDataAvailable()</span><br>
+                    <span class="command">    // Handles Simulator case gracefully</span><br>
+                    <span class="command">}</span>
+                </div>
+            </div>
+            
+            <div class="step animate delay-3">
+                <div class="step-number">3</div>
+                <div class="step-header">
+                    <span class="step-icon">🔨</span>
+                    <span class="step-title">Build & Test</span>
+                </div>
+                <p class="step-description">
+                    Developer runs tests and builds. Hooks fire automatically.
+                </p>
+                <div class="code-block">
+                    <span class="command">$ xcodebuild test -scheme StressMonitor</span><br><br>
+                    <span class="output">🔨 BUILD COMPLETE — If there were build errors, save the fix to knowledge base.</span><br><br>
+                    <span class="command">$ git add . && git commit -m "feat: HealthKit integration"</span><br><br>
+                    <span class="output">💾 COMMIT DETECTED — Review if this commit contains learnings worth saving.</span>
+                </div>
+            </div>
+            
+            <div class="step animate delay-4">
+                <div class="step-number">4</div>
+                <div class="step-header">
+                    <span class="step-icon">🧠</span>
+                    <span class="step-title">Self-Improvement Review</span>
+                </div>
+                <p class="step-description">
+                    Claude automatically reviews the work and saves learnings.
+                </p>
+                <div class="code-block">
+                    <span class="command">> review what you learned</span><br><br>
+                    <span class="output">════════════════════════════════════════════</span><br>
+                    <span class="output">🧠 SELF-IMPROVEMENT REVIEW</span><br>
+                    <span class="output">════════════════════════════════════════════</span><br><br>
+                    <span class="comment">Found 2 learnings:</span><br><br>
+                    <span class="command">1. PITFALL: HKSampleQuery requires predicate</span><br>
+                    <span class="output">   → Saved to .claude/knowledge/pitfalls.md</span><br><br>
+                    <span class="command">2. WORKFLOW: HealthKit permission flow</span><br>
+                    <span class="output">   → Saved to .claude/knowledge/workflows.md</span>
+                </div>
+            </div>
+            
+            <div class="step animate delay-4">
+                <div class="step-number">5</div>
+                <div class="step-header">
+                    <span class="step-icon">📚</span>
+                    <span class="step-title">Knowledge Grows</span>
+                </div>
+                <p class="step-description">
+                    Next session, Claude has this knowledge. No repeated mistakes.
+                </p>
+                <div class="code-block">
+                    <span class="comment"># Next session starts:</span><br>
+                    <span class="command">$ claude</span><br><br>
+                    <span class="output">📚 Knowledge loaded: Check .claude/knowledge/ for past learnings before starting.</span><br><br>
+                    <span class="comment"># Claude reads accumulated knowledge:</span><br>
+                    <span class="command">pitfalls.md: 5 entries</span><br>
+                    <span class="command">workflows.md: 3 entries</span><br>
+                    <span class="command">decisions.md: 2 entries</span><br><br>
+                    <span class="comment"># Future tasks benefit from past learnings!</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hooks Visualization -->
+        <div class="hooks-section">
+            <h2>⚡ Auto-Trigger Hooks</h2>
+            
+            <div class="hooks-grid">
+                <div class="hook-card animate delay-1">
+                    <div class="hook-icon">🎯</div>
+                    <div class="hook-name">SessionStart</div>
+                    <div class="hook-trigger">When Claude starts</div>
+                    <div class="hook-action">📚 Load knowledge reminder</div>
+                </div>
+                
+                <div class="hook-card animate delay-2">
+                    <div class="hook-icon">⏹️</div>
+                    <div class="hook-name">Stop</div>
+                    <div class="hook-trigger">After each response</div>
+                    <div class="hook-action">🧠 Review if files changed</div>
+                </div>
+                
+                <div class="hook-card animate delay-3">
+                    <div class="hook-icon">💾</div>
+                    <div class="hook-name">git commit</div>
+                    <div class="hook-trigger">PostToolUse</div>
+                    <div class="hook-action">Review commit learnings</div>
+                </div>
+                
+                <div class="hook-card animate delay-4">
+                    <div class="hook-icon">🧪</div>
+                    <div class="hook-name">test</div>
+                    <div class="hook-trigger">PostToolUse</div>
+                    <div class="hook-action">Document debugging</div>
+                </div>
+                
+                <div class="hook-card animate delay-1">
+                    <div class="hook-icon">🔨</div>
+                    <div class="hook-name">build</div>
+                    <div class="hook-trigger">PostToolUse</div>
+                    <div class="hook-action">Save build fixes</div>
+                </div>
+                
+                <div class="hook-card animate delay-2">
+                    <div class="hook-icon">🚀</div>
+                    <div class="hook-name">deploy</div>
+                    <div class="hook-trigger">PostToolUse</div>
+                    <div class="hook-action">Document deploy steps</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Example -->
+        <h2 style="text-align: center; color: #00d2ff; margin-bottom: 30px;" class="animate">Example: 3-Day Development Timeline</h2>
+        
+        <div class="timeline">
+            <div class="timeline-item animate delay-1">
+                <div class="timeline-time">Day 1 - Morning</div>
+                <div class="timeline-title">HealthKit Integration</div>
+                <div class="timeline-desc">
+                    Started HealthKit setup. Hit Simulator limitation. 
+                    Saved pitfall: "Must use physical device for HealthKit data."
+                </div>
+            </div>
+            
+            <div class="timeline-item animate delay-2">
+                <div class="timeline-time">Day 1 - Afternoon</div>
+                <div class="timeline-title">CoreML Model</div>
+                <div class="timeline-desc">
+                    Integrated CoreML model for stress prediction. 
+                    Documented workflow: Convert → Xcode → Service → Device test.
+                </div>
+            </div>
+            
+            <div class="timeline-item animate delay-3">
+                <div class="timeline-time">Day 2</div>
+                <div class="timeline-title">Architecture Decision</div>
+                <div class="timeline-desc">
+                    Chose MVVM + Services layer over MVC. 
+                    Saved decision with rationale for future reference.
+                </div>
+            </div>
+            
+            <div class="timeline-item animate delay-4">
+                <div class="timeline-time">Day 3</div>
+                <div class="timeline-title">Watch Integration</div>
+                <div class="timeline-desc">
+                    Added Apple Watch support. Referenced saved workflows 
+                    to avoid repeating HealthKit mistakes.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Made with 🧠 by 
+                <a href="https://github.com/phuongddx/claude-code-self-improvement" target="_blank">
+                    Claude Code Self-Improvement System
+                </a>
+            </p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">
+                Install: <code style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 5px;">
+                curl -fsSL https://raw.githubusercontent.com/phuongddx/claude-code-self-improvement/main/install-auto.sh | bash
+                </code>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Add scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.step, .hook-card, .timeline-item, .use-case-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+        
+        // Add hover effects for code blocks
+        document.querySelectorAll('.code-block').forEach(block => {
+            block.addEventListener('click', () => {
+                const range = document.createRange();
+                range.selectNodeContents(block);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+        });
+    </script>
+</body>
+</html>
