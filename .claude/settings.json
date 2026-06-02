@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REVIEW_HINT: Consider self-improvement review if this was a significant task.'"
+          }
+        ]
+      }
+    ]
+  }
+}
