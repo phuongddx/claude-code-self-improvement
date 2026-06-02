@@ -1,0 +1,62 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .claude/knowledge/pitfalls.md ]; then echo '📚 Knowledge loaded: Check .claude/knowledge/ for past learnings before starting.'; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if git diff --stat HEAD~1 2>/dev/null | grep -q 'file'; then echo ''; echo '════════════════════════════════════════════'; echo '🧠 SELF-IMPROVEMENT REVIEW'; echo '════════════════════════════════════════════'; echo 'Task completed. Consider: '; echo '  1. Any pitfalls encountered? → .claude/knowledge/pitfalls.md'; echo '  2. Useful workflow discovered? → .claude/knowledge/workflows.md'; echo '  3. Architecture decision made? → .claude/knowledge/decisions.md'; echo ''; echo 'Say: review what you learned'; echo '════════════════════════════════════════════'; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(git commit *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo ''; echo '💾 COMMIT DETECTED — Review if this commit contains learnings worth saving.'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(*test*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🧪 TEST COMPLETE — If debugging was involved, consider documenting the solution.'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(*build*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🔨 BUILD COMPLETE — If there were build errors, save the fix to knowledge base.'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(*deploy*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🚀 DEPLOY COMPLETE — Document deployment steps if complex.'"
+          }
+        ]
+      }
+    ]
+  }
+}
